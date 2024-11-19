@@ -18,6 +18,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Octopoda",
   description: "Octopoda Analytics",
+  other: {
+    bun: Bun.version,
+  },
 };
 
 export default function RootLayout({
