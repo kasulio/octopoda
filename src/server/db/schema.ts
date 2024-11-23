@@ -28,7 +28,7 @@ export const users = sqliteTable("user", {
   ...timestamps,
 });
 
-export const userRelations = relations(users, ({ many, one }) => ({
+export const userRelations = relations(users, ({ one }) => ({
   dashboard: one(dashboard, {
     fields: [users.id],
     references: [dashboard.userId],
