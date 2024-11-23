@@ -1,11 +1,12 @@
 import { relations, sql } from "drizzle-orm";
 import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-function createIdType(title = "id") {
-  return text(title, { length: 255 })
+function createIdType(title = "id", primaryKey = true) {
+  const type = text(title, { length: 255 })
     .notNull()
-    .primaryKey()
     .$defaultFn(() => crypto.randomUUID());
+
+  return primaryKey ? type.primaryKey() : type;
 }
 
 const timestamps = {
@@ -43,7 +44,7 @@ export const instances = sqliteTable("instance", {
 
 export const loadingSessions = sqliteTable("loading_session", {
   id: createIdType(),
-  instanceId: createIdType("instance_id")
+  instanceId: createIdType("instance_id", false)
     .notNull()
     .references(() => instances.id),
   startTime: int("start_time", { mode: "timestamp" }),
@@ -71,7 +72,7 @@ export const loadingSessionRelations = relations(
 
 export const dashboard = sqliteTable("dashboard", {
   id: createIdType(),
-  userId: createIdType("user_id")
+  userId: createIdType("user_id", false)
     .notNull()
     .references(() => users.id),
   ...timestamps,
