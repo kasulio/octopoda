@@ -5,10 +5,15 @@
 import { type NextConfig } from "next";
 import "./src/env";
 
+console.log("test db connection");
 // test db connection
-import { client, db } from "./src/server/db";
-console.log(client.query("SELECT 1"));
-console.log(db.query.users.findMany());
+try {
+  const { client, db } = await import("./src/server/db");
+  console.log(client.query("SELECT 1"));
+  console.log(db.query.users.findMany());
+} catch (error) {
+  console.error(error);
+}
 
 const config: NextConfig = {};
 
