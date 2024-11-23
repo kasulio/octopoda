@@ -6,10 +6,10 @@
   "scripts": {
     "build": "bun --bun node_modules/.bin/next build",
     "check": "bun --bun node_modules/.bin/next lint && tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
+    "db:generate": "bun --bun node_modules/.bin/drizzle-kit generate",
+    "db:migrate": "bun --bun node_modules/.bin/drizzle-kit migrate",
+    "db:push": "bun --bun node_modules/.bin/drizzle-kit push",
+    "db:studio": "bun --bun node_modules/.bin/drizzle-kit studio",
     "db:dbml": "bun drizzle/generate-dbml.ts",
     "dev": "bun --bun node_modules/.bin/next dev --turbo",
     "format:check": "bun --bun node_modules/.bin/prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
-    "@libsql/client": "^0.9.0",
     "@t3-oss/env-nextjs": "^0.10.1",
     "@tanstack/react-query": "^5.50.0",
     "@trpc/client": "^11.0.0-rc.446",
@@ -39,6 +38,7 @@
     "zod": "^3.23.3"
   },
   "devDependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@types/bun": "^1.1.13",
     "@types/eslint": "^8.56.10",
     "@types/node": "^20.14.10",

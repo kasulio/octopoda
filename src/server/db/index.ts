@@ -1,33 +1,27 @@
-import { createClient, type Client } from "@libsql/client";
+import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/bun-sqlite";
 
 import { env } from "~/env";
 import * as schema from "./schema";
-import { drizzle } from "drizzle-orm/libsql";
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
  * update.
  */
 const globalForDb = globalThis as unknown as {
-  // client: Database | undefined;
-  client: Client | undefined;
+  client: Database | undefined;
 };
 
-// export const client =
-//   globalForDb.client ?? new Database(env.DATABASE_PATH, { create: true });
-
-let client: Client;
-
+let client: Database;
 try {
-  client =
-    globalForDb.client ?? createClient({ url: `file:${env.DATABASE_PATH}` });
+  client = new Database(env.DATABASE_PATH, { create: true });
 } catch (error) {
   console.error(error);
-  client = createClient({ url: `:memory:` });
+  client = new Database(":memory:", { create: true });
 }
 
-export { client };
-
 if (env.NODE_ENV !== "production") globalForDb.client = client;
+
+export { client };
 
 export const db = drizzle(client, { schema });
