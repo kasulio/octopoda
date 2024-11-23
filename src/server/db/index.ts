@@ -16,8 +16,18 @@ const globalForDb = globalThis as unknown as {
 // export const client =
 //   globalForDb.client ?? new Database(env.DATABASE_PATH, { create: true });
 
-export const client =
-  globalForDb.client ?? createClient({ url: `file:${env.DATABASE_PATH}` });
+let client: Client;
+
+try {
+  client =
+    globalForDb.client ?? createClient({ url: `file:${env.DATABASE_PATH}` });
+} catch (error) {
+  console.error(error);
+  client = createClient({ url: `:memory:` });
+}
+
+export { client };
+
 if (env.NODE_ENV !== "production") globalForDb.client = client;
 
 export const db = drizzle(client, { schema });
