@@ -1,116 +1,85 @@
 import { relations, sql } from "drizzle-orm";
-import {
-  index,
-  int,
-  primaryKey,
-  sqliteTableCreator,
-  text,
-} from "drizzle-orm/sqlite-core";
-import { type AdapterAccount } from "next-auth/adapters";
+import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
-export const createTable = sqliteTableCreator((name) => `octopoda_${name}`);
-
-export const posts = createTable(
-  "post",
-  {
-    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
-    createdById: text("created_by", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: int("updatedAt", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
-  },
-  (example) => ({
-    createdByIdIdx: index("created_by_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  })
-);
-
-export const users = createTable("user", {
-  id: text("id", { length: 255 })
+function createIdType(title = "id") {
+  return text(title, { length: 255 })
     .notNull()
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name", { length: 255 }),
+    .$defaultFn(() => crypto.randomUUID());
+}
+
+const timestamps = {
+  createdAt: int("created_at", { mode: "timestamp" }).default(
+    sql`(unixepoch())`,
+  ),
+  updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
+    () => new Date(),
+  ),
+  deletedAt: int("deleted_at", { mode: "timestamp" }),
+};
+
+export const users = sqliteTable("user", {
+  id: createIdType(),
+  firstName: text("first_name", { length: 255 }),
+  lastName: text("last_name", { length: 255 }),
   email: text("email", { length: 255 }).notNull(),
-  emailVerified: int("email_verified", {
-    mode: "timestamp",
-  }).default(sql`(unixepoch())`),
-  image: text("image", { length: 255 }),
+  passwordHash: text("password_hash", { length: 255 }),
+  isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
+  ...timestamps,
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
+export const userRelations = relations(users, ({ many, one }) => ({
+  dashboard: one(dashboard, {
+    fields: [users.id],
+    references: [dashboard.userId],
+  }),
 }));
 
-export const accounts = createTable(
-  "account",
-  {
-    userId: text("user_id", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    type: text("type", { length: 255 })
-      .$type<AdapterAccount["type"]>()
-      .notNull(),
-    provider: text("provider", { length: 255 }).notNull(),
-    providerAccountId: text("provider_account_id", { length: 255 }).notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: int("expires_at"),
-    token_type: text("token_type", { length: 255 }),
-    scope: text("scope", { length: 255 }),
-    id_token: text("id_token"),
-    session_state: text("session_state", { length: 255 }),
-  },
-  (account) => ({
-    compoundKey: primaryKey({
-      columns: [account.provider, account.providerAccountId],
+export const instances = sqliteTable("instance", {
+  id: createIdType(),
+  bucket: text("bucket", { length: 255 }),
+  ...timestamps,
+});
+
+export const loadingSessions = sqliteTable("loading_session", {
+  id: createIdType(),
+  instanceId: createIdType("instance_id")
+    .notNull()
+    .references(() => instances.id),
+  startTime: int("start_time", { mode: "timestamp" }),
+  endTime: int("end_time", { mode: "timestamp" }),
+  location: text("location", { length: 255 }),
+  vehicle: text("vehicle", { length: 255 }),
+  energy: real("energy"),
+  duration: text("duration", { length: 255 }),
+  sunPercentage: real("sun_percentage"),
+  price: real("price"),
+  pricePerKwh: real("price_per_kwh"),
+  co2PerKwh: real("co2_per_kwh"),
+  ...timestamps,
+});
+
+export const loadingSessionRelations = relations(
+  loadingSessions,
+  ({ one }) => ({
+    instance: one(instances, {
+      fields: [loadingSessions.instanceId],
+      references: [instances.id],
     }),
-    userIdIdx: index("account_user_id_idx").on(account.userId),
-  })
+  }),
 );
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+export const dashboard = sqliteTable("dashboard", {
+  id: createIdType(),
+  userId: createIdType("user_id")
+    .notNull()
+    .references(() => users.id),
+  ...timestamps,
+});
+
+export const dashboardRelations = relations(dashboard, ({ one }) => ({
+  user: one(users, {
+    fields: [dashboard.userId],
+    references: [users.id],
+  }),
 }));
-
-export const sessions = createTable(
-  "session",
-  {
-    sessionToken: text("session_token", { length: 255 }).notNull().primaryKey(),
-    userId: text("userId", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    expires: int("expires", { mode: "timestamp" }).notNull(),
-  },
-  (session) => ({
-    userIdIdx: index("session_userId_idx").on(session.userId),
-  })
-);
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
-export const verificationTokens = createTable(
-  "verification_token",
-  {
-    identifier: text("identifier", { length: 255 }).notNull(),
-    token: text("token", { length: 255 }).notNull(),
-    expires: int("expires", { mode: "timestamp" }).notNull(),
-  },
-  (vt) => ({
-    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
-);
