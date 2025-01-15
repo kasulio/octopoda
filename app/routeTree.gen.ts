@@ -18,6 +18,7 @@ import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as PublicIndexImport } from './routes/_public/index'
 import { Route as DashboardUsersImport } from './routes/dashboard/users'
 import { Route as DashboardImportImport } from './routes/dashboard/import'
+import { Route as DashboardGrafanaEmbedImport } from './routes/dashboard/grafana-embed'
 import { Route as PublicContributeImport } from './routes/_public/contribute'
 import { Route as DashboardInstancesLayoutImport } from './routes/dashboard/instances/layout'
 import { Route as DashboardInstancesIndexImport } from './routes/dashboard/instances/index'
@@ -65,6 +66,12 @@ const DashboardUsersRoute = DashboardUsersImport.update({
 const DashboardImportRoute = DashboardImportImport.update({
   id: '/import',
   path: '/import',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+
+const DashboardGrafanaEmbedRoute = DashboardGrafanaEmbedImport.update({
+  id: '/grafana-embed',
+  path: '/grafana-embed',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
 
@@ -143,6 +150,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/contribute'
       preLoaderRoute: typeof PublicContributeImport
       parentRoute: typeof PublicLayoutImport
+    }
+    '/dashboard/grafana-embed': {
+      id: '/dashboard/grafana-embed'
+      path: '/grafana-embed'
+      fullPath: '/dashboard/grafana-embed'
+      preLoaderRoute: typeof DashboardGrafanaEmbedImport
+      parentRoute: typeof DashboardLayoutImport
     }
     '/dashboard/import': {
       id: '/dashboard/import'
@@ -241,6 +255,7 @@ const DashboardInstancesLayoutRouteWithChildren =
 
 interface DashboardLayoutRouteChildren {
   DashboardInstancesLayoutRoute: typeof DashboardInstancesLayoutRouteWithChildren
+  DashboardGrafanaEmbedRoute: typeof DashboardGrafanaEmbedRoute
   DashboardImportRoute: typeof DashboardImportRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -248,6 +263,7 @@ interface DashboardLayoutRouteChildren {
 
 const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
   DashboardInstancesLayoutRoute: DashboardInstancesLayoutRouteWithChildren,
+  DashboardGrafanaEmbedRoute: DashboardGrafanaEmbedRoute,
   DashboardImportRoute: DashboardImportRoute,
   DashboardUsersRoute: DashboardUsersRoute,
   DashboardIndexRoute: DashboardIndexRoute,
@@ -263,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard/instances': typeof DashboardInstancesLayoutRouteWithChildren
   '/contribute': typeof PublicContributeRoute
+  '/dashboard/grafana-embed': typeof DashboardGrafanaEmbedRoute
   '/dashboard/import': typeof DashboardImportRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/': typeof PublicIndexRoute
@@ -276,6 +293,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/contribute': typeof PublicContributeRoute
+  '/dashboard/grafana-embed': typeof DashboardGrafanaEmbedRoute
   '/dashboard/import': typeof DashboardImportRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/': typeof PublicIndexRoute
@@ -293,6 +311,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/dashboard/instances': typeof DashboardInstancesLayoutRouteWithChildren
   '/_public/contribute': typeof PublicContributeRoute
+  '/dashboard/grafana-embed': typeof DashboardGrafanaEmbedRoute
   '/dashboard/import': typeof DashboardImportRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/_public/': typeof PublicIndexRoute
@@ -311,6 +330,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/instances'
     | '/contribute'
+    | '/dashboard/grafana-embed'
     | '/dashboard/import'
     | '/dashboard/users'
     | '/'
@@ -323,6 +343,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/contribute'
+    | '/dashboard/grafana-embed'
     | '/dashboard/import'
     | '/dashboard/users'
     | '/'
@@ -338,6 +359,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/instances'
     | '/_public/contribute'
+    | '/dashboard/grafana-embed'
     | '/dashboard/import'
     | '/dashboard/users'
     | '/_public/'
@@ -389,6 +411,7 @@ export const routeTree = rootRoute
       "filePath": "dashboard/layout.tsx",
       "children": [
         "/dashboard/instances",
+        "/dashboard/grafana-embed",
         "/dashboard/import",
         "/dashboard/users",
         "/dashboard/"
@@ -408,6 +431,10 @@ export const routeTree = rootRoute
     "/_public/contribute": {
       "filePath": "_public/contribute.tsx",
       "parent": "/_public"
+    },
+    "/dashboard/grafana-embed": {
+      "filePath": "dashboard/grafana-embed.tsx",
+      "parent": "/dashboard"
     },
     "/dashboard/import": {
       "filePath": "dashboard/import.tsx",

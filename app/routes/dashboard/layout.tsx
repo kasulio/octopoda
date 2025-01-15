@@ -72,7 +72,7 @@ function RouteComponent() {
             <Breadcrumbs />
             <SidebarTrigger className="ml-auto -mr-1 rotate-180" />
           </header>
-          <div className="p-4 ">
+          <div className="p-4 grow flex flex-col">
             <DynamicPageTitle />
             <Outlet />
           </div>

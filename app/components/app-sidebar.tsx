@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link, type LinkOptions } from "@tanstack/react-router";
 import {
+  ChartBarIcon,
   ImportIcon,
   LayoutDashboardIcon,
   ServerIcon,
@@ -46,6 +47,13 @@ const data = {
         to: "/dashboard/users",
       },
       icon: UsersIcon,
+    },
+    {
+      title: "Grafana",
+      linkOptions: {
+        to: "/dashboard/grafana-embed",
+      },
+      icon: ChartBarIcon,
     },
     {
       title: "Import",
