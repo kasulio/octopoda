@@ -53,11 +53,6 @@ export const Route = createRootRouteWithContext<{
         rel: "font",
         href: inter,
       },
-      {
-        rel: "preload",
-        href: "https://grafana.lukasfrey.dev/public-dashboards/2253e03512554bc58bdfb8f592a48d62?theme=light",
-        as: "document",
-      },
     ],
     scripts:
       env.PUBLIC_NODE_ENV === "development"
