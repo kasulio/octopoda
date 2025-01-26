@@ -1,8 +1,23 @@
 import { expect, test } from "@playwright/test";
+import { DeleteUser } from "tests/user_tests/deleteUser.po";
+import { LoginPage } from "tests/user_tests/login.po";
+import { LogoutPage } from "tests/user_tests/logout.po";
 
-import { DeleteUser } from "./deleteUser.po";
-import { LoginPage } from "./login.po";
-import { LogoutPage } from "./logout.po";
+const routesToTest = [
+  { path: "/dashboard", selector: "header" },
+  { path: "/dashboard/instances", selector: "header" },
+  { path: "/dashboard/import", selector: "header" },
+  { path: "/dashboard/users", selector: "header" },
+  { path: "/dashboard/layout", selector: "header" },
+  { path: "/login", selector: "form" },
+  { path: "/view-data", selector: "main" },
+  { path: "/view-data/malie?timeSeriesMetric=batterySoc", selector: "main" },
+  { path: "/view-data/contribute", selector: "main" },
+  { path: "/view-data/impressum", selector: "main" },
+  { path: "/view-data/privacy", selector: "main" },
+  { path: "/view-data/layout", selector: "main" },
+  { path: "/dashboard/", selector: "header" },
+];
 
 let username: string;
 let password: string;
@@ -22,13 +37,11 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/login");
 });
 
-test("login, user delete and logout", async ({ page }) => {
-
+test(`should visit page and find something`, async ({ page }) => {
+  // So i can actually see all the pages i have to be logged in
   await page.goto("/dashboard");
 
   const loginPage = new LoginPage(page);
-
-  // logging in
 
   await expect(loginPage.usernameInputfield).toBeVisible();
   await expect(loginPage.passwordInputfield).toBeVisible();
@@ -38,10 +51,15 @@ test("login, user delete and logout", async ({ page }) => {
   await loginPage.loginButton.click();
 
   await page.waitForSelector("text=Dashboard");
+  // untill here
+  for (const { path, selector } of routesToTest) {
+    await page.goto(path);
+    await expect(page.locator(selector)).toBeVisible(); 
+  }
+
   await page.goto("/dashboard/users");
-
-  // deleting user
-
+  
+  // and also log out
   const user_DeletePage = new DeleteUser(page, username);
   await user_DeletePage.menuButtonForUser.hover();
   await user_DeletePage.menuButtonForUser.focus();
